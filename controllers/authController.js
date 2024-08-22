@@ -1,9 +1,10 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const User = require('../models/user');
+const User = require('../models/User');
 
 const SECRET_KEY = 'lucky';
 
+// Middleware to authenticate token
 exports.authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -19,6 +20,7 @@ exports.authenticateToken = (req, res, next) => {
   });
 };
 
+// User login
 exports.login = async (req, res) => {
   const { username, password } = req.body;
 
@@ -28,18 +30,37 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid username or password' });
     }
 
-    // Compare the provided password with the hashed password in the database
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid username or password' });
     }
 
-    // Sign a new token
     const token = jwt.sign({ id: user._id }, SECRET_KEY, { expiresIn: '1h' });
     res.json({ token });
 
   } catch (error) {
     console.error("Login error:", error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// User registration
+exports.register = async (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Username already exists' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({ username, password: hashedPassword });
+    await newUser.save();
+
+    res.status(201).json({ message: 'User registered successfully' });
+  } catch (error) {
+    console.error('Registration error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

@@ -6,7 +6,7 @@ const Post = require('../models/Post');
 const { authenticateToken } = require('../controllers/authController');
 
 // Get all posts
-router.get('/posts', async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const posts = await Post.find();
     res.json(posts);
@@ -16,7 +16,7 @@ router.get('/posts', async (req, res) => {
 });
 
 // Get a single post by ID
-router.get('/posts/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
     res.json(post);
@@ -26,7 +26,7 @@ router.get('/posts/:id', async (req, res) => {
 });
 
 // Create a new post
-router.post('/posts', authenticateToken, async (req, res) => {
+router.post('/', authenticateToken, async (req, res) => {
   const post = new Post({
     title: req.body.title,
     content: req.body.content,
@@ -40,7 +40,7 @@ router.post('/posts', authenticateToken, async (req, res) => {
 });
 
 // Update a post by ID
-router.put('/posts/:id', authenticateToken, async (req, res) => {
+router.put('/:id', authenticateToken, async (req, res) => {
   try {
     const updatedPost = await Post.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.json(updatedPost);
@@ -50,7 +50,7 @@ router.put('/posts/:id', authenticateToken, async (req, res) => {
 });
 
 // Delete a post by ID
-router.delete('/posts/:id', authenticateToken, async (req, res) => {
+router.delete('/:id', authenticateToken, async (req, res) => {
   try {
     await Post.findByIdAndDelete(req.params.id);
     res.json({ message: 'Post deleted' });
